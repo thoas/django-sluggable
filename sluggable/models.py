@@ -5,6 +5,9 @@ from django.utils.translation import ugettext_lazy as _
 from django.db.models.query import QuerySet
 
 
+from .settings import slugify
+
+
 class SlugQuerySet(QuerySet):
     def filter_by_obj(self, obj, **kwargs):
         content_type = ContentType.objects.get_for_model(obj)
@@ -35,11 +38,17 @@ class SlugManager(models.Manager):
         except self.model.DoesNotExist:
             return None
 
-    def is_slug_available(self, slug):
+    def is_slug_available(self, slug, obj=None):
         if slug in self.get_forbidden_slugs():
             return False
 
-        if self.filter(slug=slug).exists():
+        qs = self.filter(slug=slug)
+
+        if not obj is None:
+            qs.exclude(object_id=obj.pk,
+                       content_type=ContentType.objects.get_for_model(obj))
+
+        if qs.exists():
             return False
 
         return True

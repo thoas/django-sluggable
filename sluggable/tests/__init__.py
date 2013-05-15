@@ -1,6 +1,8 @@
 from django.test import TestCase
 
+from .models import Poll, PollSlug
+
 
 class SluggableTests(TestCase):
     def test_simple_add(self):
-        self.assertEqual(1, 1)
+        poll = Poll.objects.create(question='Quick test')
