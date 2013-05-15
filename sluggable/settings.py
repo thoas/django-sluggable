@@ -20,3 +20,6 @@ if not slugify:
 if isinstance(slugify, str):
     from django.core.urlresolvers import get_callable
     slugify = get_callable(slugify)
+
+
+SLUGGABLE_SEPARATOR = getattr(settings, 'SLUGGABLE_SEPARATOR', '-')
