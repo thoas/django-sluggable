@@ -19,7 +19,7 @@ class SluggableField(models.SlugField):
     def contribute_to_class(self, cls, name):
         super(SluggableField, self).contribute_to_class(cls, name)
 
-        signals.pre_save.connect(self.post_save, sender=cls)
+        signals.pre_save.connect(self.pre_save, sender=cls)
         signals.post_save.connect(self.post_save, sender=cls)
         signals.post_delete.connect(self.post_delete, sender=cls)
 
@@ -36,19 +36,22 @@ class SluggableField(models.SlugField):
         if self.always_update or (self.populate_from and not value):
             value = utils.get_prepopulated_value(instance, self.populate_from)
 
-        slug = utils.crop_slug(self.slugify(value), self.max_length)
+        if value or getattr(instance, self.name).changed:
+            slug = utils.crop_slug(self.slugify(value), self.max_length)
 
-        slug = self.decider.objects.generate_unique_slug(instance, slug,
-                                                         self.max_length,
-                                                         self.name,
-                                                         self.index_sep)
+            slug = self.decider.objects.generate_unique_slug(instance, slug,
+                                                             self.max_length,
+                                                             self.name,
+                                                             self.index_sep)
 
-        setattr(instance, self.name, slug)
+            setattr(instance, self.name, slug)
 
-        return slug
+            return slug
+
+        return None
 
     def post_save(self, instance, **kwargs):
-        pass
+        self.decider.objects.update_slug(instance, instance.slug)
 
     def post_delete(self, instance, **kwargs):
         self.decider.objects.filter_by_obj(instance).delete()
@@ -57,6 +60,7 @@ class SluggableField(models.SlugField):
 class SluggableObjectDescriptor(object):
     def __init__(self, field_with_rel):
         self.field = field_with_rel
+        self.changed = False
 
     def __get__(self, instance, instance_type=None):
         val = instance.__dict__.get(self.field.attname, None)
@@ -70,3 +74,4 @@ class SluggableObjectDescriptor(object):
 
     def __set__(self, instance, value):
         instance.__dict__[self.field.attname] = value
+        self.changed = True

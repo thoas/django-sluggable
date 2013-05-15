@@ -13,14 +13,19 @@ class SlugQuerySet(QuerySet):
         content_type = kwargs.pop('content_type',
                                   ContentType.objects.get_for_model(obj))
 
-        return self.filter(content_type_id=get_obj_id(content_type),
-                           object_id=obj.pk,
-                           **kwargs)
+        return self.filter_by_obj_id(obj.pk,
+                                     content_type=content_type,
+                                     **kwargs)
 
     def filter_by_obj_id(self, obj_id, content_type, **kwargs):
-        return self.filter(content_type_id=get_obj_id(content_type),
-                           object_id=obj_id,
-                           **kwargs)
+        _filter = self.filter
+
+        if kwargs.pop('exclude', False):
+            _filter = self.exclude
+
+        return _filter(content_type_id=get_obj_id(content_type),
+                       object_id=obj_id,
+                       **kwargs)
 
     def filter_by_model(self, klass, **kwargs):
         content_type = kwargs.pop('content_type',
@@ -63,8 +68,7 @@ class SlugManager(models.Manager):
         qs = self.filter(slug=slug)
 
         if not obj is None:
-            qs.exclude(object_id=obj.pk,
-                       content_type=ContentType.objects.get_for_model(obj))
+            qs = qs.filter_by_obj(obj, exclude=True)
 
         if qs.exists():
             return False
@@ -74,8 +78,49 @@ class SlugManager(models.Manager):
     def generate_unique_slug(self, instance, slug, max_length,
                              field_name, index_sep):
 
-        return generate_unique_slug(self, instance, slug, max_length,
+        qs = self.filter_by_obj(instance, exclude=True)
+
+        return generate_unique_slug(qs, instance, slug, max_length,
                                     field_name, index_sep)
+
+    def update_slug(self, instance, slug, erase_redirects=False):
+        content_type = ContentType.objects.get_for_model(instance)
+
+        pk = instance.pk
+
+        try:
+            filters = {
+                'content_type': content_type,
+                'object_id': pk,
+                'redirect': False,
+            }
+            current = self.get(**filters)
+            new = False
+            update = current.slug != slug
+        except self.model.DoesNotExist:
+            new = True
+            update = True
+
+        if update:
+            filters = {
+                'content_type': content_type,
+                'object_id': pk,
+            }
+
+            qs = self.filter(**filters).exclude(slug=slug)
+
+            if not new and erase_redirects:
+                qs.delete()
+            else:
+                qs.update(redirect=True)
+
+            filters['slug'] = slug
+
+            affected = self.filter(**filters).update(redirect=False)
+
+            if not affected:
+                slug = self.model(**dict({'redirect': False}, **filters))
+                slug.save()
 
 
 class Slug(models.Model):

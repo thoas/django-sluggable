@@ -1,7 +1,7 @@
 from django.db import models
 
 
-def get_obj_id(self, obj):
+def get_obj_id(obj):
     obj_id = obj
 
     if isinstance(obj, models.Model):
