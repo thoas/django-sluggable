@@ -18,3 +18,6 @@ class SluggableTests(TestCase):
         self.assertFalse(slug.redirect)
 
         self.assertEquals(slug.content_object, poll)
+
+        poll.question = 'Another test'
+        poll.save()

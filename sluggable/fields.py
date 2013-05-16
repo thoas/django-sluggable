@@ -31,12 +31,12 @@ class SluggableField(models.SlugField):
         setattr(cls, self.name, SluggableObjectDescriptor(self))
 
     def pre_save(self, instance, *args, **kwargs):
-        value = self.value_from_object(instance)
+        original_value = value = self.value_from_object(instance)
 
         if self.always_update or (self.populate_from and not value):
             value = utils.get_prepopulated_value(instance, self.populate_from)
 
-        if value or getattr(instance, self.name).changed:
+        if value and (original_value != value or getattr(instance, self.name).changed):
             slug = utils.crop_slug(self.slugify(value), self.max_length)
 
             slug = self.decider.objects.generate_unique_slug(instance, slug,
