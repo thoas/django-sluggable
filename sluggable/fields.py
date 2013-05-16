@@ -93,7 +93,6 @@ class SluggableField(models.SlugField):
 
             slug = self.decider.objects.generate_unique_slug(instance, slug,
                                                              self.max_length,
-                                                             self.name,
                                                              self.index_sep)
 
             setattr(instance, self.name, slug)
@@ -104,7 +103,7 @@ class SluggableField(models.SlugField):
 
     def instance_post_save(self, instance, **kwargs):
         if getattr(instance, self.name).changed:
-            self.decider.objects.update_slug(instance, instance.slug)
+            self.decider.objects.update_slug(instance, getattr(instance, self.name))
 
         getattr(instance, self.name).changed = False
 

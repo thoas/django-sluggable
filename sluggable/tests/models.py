@@ -24,4 +24,4 @@ class UserSlug(Slug):
 
 
 class User(models.Model):
-    username = SluggableField(decider=UserSlug)
+    username = SluggableField(decider=UserSlug, unique=True)

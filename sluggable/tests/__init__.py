@@ -1,11 +1,46 @@
 from django.test import TestCase
 
-from .models import Poll, PollSlug
+from .models import Poll, PollSlug, UserSlug, User
 
 
 class SluggableTests(TestCase):
     def test_sluggable_models_for_decider(self):
         self.assertEquals(PollSlug.sluggable_models, [Poll])
+
+    def test_slug_without_populate_from(self):
+        user = User.objects.create(username='thoas')
+
+        self.assertEquals(UserSlug.objects.count(), 1)
+
+        user.username = 'oleiade'
+        user.save()
+
+        self.assertEquals(UserSlug.objects.count(), 2)
+
+        current = UserSlug.objects.get_current(user)
+
+        self.assertEquals(current.slug, 'oleiade')
+
+        user.username = 'thoas'
+        user.save()
+
+        current = UserSlug.objects.get_current(user)
+
+        self.assertEquals(current.slug, 'thoas')
+
+        self.assertEquals(UserSlug.objects.filter(redirect=True).count(), 1)
+
+        user = User.objects.create(username='thoas')
+
+        self.assertEquals(user.username, 'thoas-2')
+
+        old = User.objects.get(username='thoas')
+        old.delete()
+
+        user.username = 'thoas'
+        user.save()
+
+        self.assertEquals(user.username, 'thoas')
 
     def test_changed(self):
         poll = Poll.objects.create(question='Quick test')

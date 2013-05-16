@@ -75,13 +75,12 @@ class SlugManager(models.Manager):
 
         return True
 
-    def generate_unique_slug(self, instance, slug, max_length,
-                             field_name, index_sep):
+    def generate_unique_slug(self, instance, slug, max_length, index_sep):
 
         qs = self.filter_by_obj(instance, exclude=True)
 
         return generate_unique_slug(qs, instance, slug, max_length,
-                                    field_name, index_sep)
+                                    'slug', index_sep)
 
     def update_slug(self, instance, slug, erase_redirects=False):
         content_type = ContentType.objects.get_for_model(instance)
