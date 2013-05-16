@@ -3,6 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.utils.translation import ugettext_lazy as _
 from django.db.models.query import QuerySet
+from django.core.exceptions import ObjectDoesNotExist
 
 
 from .utils import get_obj_id, generate_unique_slug
@@ -18,14 +19,10 @@ class SlugQuerySet(QuerySet):
                                      **kwargs)
 
     def filter_by_obj_id(self, obj_id, content_type, **kwargs):
-        _filter = self.filter
-
-        if kwargs.pop('exclude', False):
-            _filter = self.exclude
-
-        return _filter(content_type_id=get_obj_id(content_type),
-                       object_id=obj_id,
-                       **kwargs)
+        return self._filter_or_exclude(kwargs.pop('exclude', False),
+                                       content_type_id=get_obj_id(content_type),
+                                       object_id=obj_id,
+                                       **kwargs)
 
     def filter_by_model(self, klass, **kwargs):
         content_type = kwargs.pop('content_type',
@@ -59,9 +56,9 @@ class SlugManager(models.Manager):
 
         try:
             return self.filter_by_obj_id(obj_id,
-                                         redirect=False,
-                                         content_type=content_type).get()
-        except self.model.DoesNotExist:
+                                         content_type=content_type,
+                                         redirect=False).get()
+        except ObjectDoesNotExist:
             return None
 
     def is_slug_available(self, slug, obj=None):
@@ -143,13 +140,19 @@ class Slug(models.Model):
     class Meta:
         abstract = True
 
+    def __unicode__(self):
+        return _(u'%s for %s') % (self.slug, self.content_object)
+
     @classmethod
     def forbidden_slugs(self):
         return []
 
-    def get_current(self):
-        if self.redirect:
+    @property
+    def current(self):
+        if not self.redirect:
             return self
 
-        return Slug.objects.get_current_for_obj(self.object_id,
-                                                content_type=self.content_type_id)
+        klass = self.__class__
+
+        return klass.objects.get_current(self.object_id,
+                                         content_type=self.content_type_id)

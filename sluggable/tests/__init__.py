@@ -38,10 +38,13 @@ class SluggableTests(TestCase):
 
         self.assertFalse(slug.redirect)
 
-        slug = PollSlug.objects.get(slug='quick-test')
-        self.assertTrue(slug.redirect)
+        old = PollSlug.objects.get(slug='quick-test')
+
+        self.assertTrue(old.redirect)
 
         current = PollSlug.objects.get_current(poll)
+
+        self.assertEquals(old.current, slug)
 
         self.assertFalse(current is None)
 
