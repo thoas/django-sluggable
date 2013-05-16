@@ -10,3 +10,9 @@ Installation
 To install it, simply ::
 
     pip install django-sluggable
+
+Documentation
+-------------
+
+For documentation, usage, and examples, see:
+http://django-sluggable.readthedocs.org
