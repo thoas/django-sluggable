@@ -7,7 +7,7 @@ class SluggableTests(TestCase):
     def test_simple_add(self):
         poll = Poll.objects.create(question='Quick test')
 
-        self.assertEquals(poll.slug, 'quick-test')
+        self.assertEquals(unicode(poll.slug), u'quick-test')
 
         self.assertEquals(PollSlug.objects.count(), 1)
 
@@ -18,6 +18,3 @@ class SluggableTests(TestCase):
         self.assertFalse(slug.redirect)
 
         self.assertEquals(slug.content_object, poll)
-
-        poll.question = 'Another test'
-        poll.save()
