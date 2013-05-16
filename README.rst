@@ -1,6 +1,11 @@
 django-sluggable
 ================
 
+.. image:: https://secure.travis-ci.org/thoas/django-sluggable.png?branch=master
+    :alt: Build Status
+    :target: http://travis-ci.org/thoas/django-sluggable
+
+
 django-sluggable is a library to manage your slugs and redirect old slugs
 to a new one. With this library, you will have the plain history of your operations.
 
