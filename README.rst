@@ -16,3 +16,13 @@ Documentation
 
 For documentation, usage, and examples, see:
 http://django-sluggable.readthedocs.org
+
+Inspiration
+-----------
+
+Some code are from `django-autoslug`_ and old codebase of Ulule by `twidi`_.
+
+A big thanks to them.
+
+.._ django-autoslug: https://pypi.python.org/pypi/django-autoslug
+.._ twidi: https://github.com/twidi
