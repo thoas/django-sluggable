@@ -7,6 +7,23 @@ class SluggableTests(TestCase):
     def test_sluggable_models_for_decider(self):
         self.assertEquals(PollSlug.sluggable_models, [Poll])
 
+    def test_changed(self):
+        poll = Poll.objects.create(question='Quick test')
+
+        self.assertFalse(poll.slug.changed)
+
+        poll = Poll.objects.get(slug='quick-test')
+
+        self.assertFalse(poll.slug.changed)
+
+        poll = Poll(question='Quick test')
+
+        self.assertTrue(poll.slug.changed)
+
+        poll.save()
+
+        self.assertEquals(poll.slug, 'quick-test-2')
+
     def test_simple_add(self):
         poll = Poll.objects.create(question='Quick test')
 

@@ -66,6 +66,7 @@ class SluggableField(models.SlugField):
     def contribute_to_class(self, cls, name):
         super(SluggableField, self).contribute_to_class(cls, name)
 
+        signals.post_init.connect(self.instance_post_init, sender=cls)
         signals.pre_save.connect(self.instance_pre_save, sender=cls)
         signals.post_save.connect(self.instance_post_save, sender=cls)
         signals.post_delete.connect(self.instance_post_delete, sender=cls)
@@ -76,6 +77,10 @@ class SluggableField(models.SlugField):
         self.decider.sluggable_models.append(cls)
 
         setattr(cls, self.name, self.descriptor_class(self))
+
+    def instance_post_init(self, instance, *args, **kwargs):
+        if instance.pk:
+            getattr(instance, self.name).changed = False
 
     def instance_pre_save(self, instance, *args, **kwargs):
         original_value = value = self.value_from_object(instance)
@@ -100,6 +105,8 @@ class SluggableField(models.SlugField):
     def instance_post_save(self, instance, **kwargs):
         if getattr(instance, self.name).changed:
             self.decider.objects.update_slug(instance, instance.slug)
+
+        getattr(instance, self.name).changed = False
 
     def instance_post_delete(self, instance, **kwargs):
         self.decider.objects.filter_by_obj(instance).delete()

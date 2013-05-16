@@ -1,0 +1,7 @@
+.. _ref-architecture:
+
+============
+Architecture
+============
+
+...
