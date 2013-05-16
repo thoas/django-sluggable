@@ -24,8 +24,8 @@ between the old username and the new one.
 In ``models.py``, we will define a decider model which will store all usernames::
 
     # users/models.py
-
     from sluggable.models import Slug
+
 
     class UserSlug(Slug):
         class Meta:
@@ -37,8 +37,8 @@ so we will change the type of the ``username`` field.
 ::
 
     # users/models.py
-
     from sluggable.fields import SluggableField
+
 
     class User(models.Model):
         username = SluggableField(decider=UserSlug)
@@ -92,7 +92,125 @@ for that::
 Working with class-based views
 ------------------------------
 
-More to come
+Now you know how to manipulate your users (oh yeah), we will add real world
+examples in an real application.
+
+Let's begin with ``views.py``, this section will only use `Class-based views`_
+so if you are not familiar with them, go check them they are awesome ;o)::
+
+    # users/views.py
+    from django.views import generic
+
+    from users.models import User
+
+
+    class UserDetailView(generic.Detail):
+        model = UserSlug
+        context_object_name = 'slug'
+        slug_field = 'username'
+        template_name = 'users/detail.html'
+
+
+    # users/urls.py
+    from users import views
+
+
+    urlpatterns = patterns('',
+        url(r'^users/(?P<username>\w+)/$',
+            views.UserDetailView.as_view(),
+            name='user_detail'),
+    )
+
+
+So we have defined a pretty standard view to show an user with its username,
+so boring duh?
+
+The interesting part is the redirection provided by `django-sluggable`_, let's
+rewrite our ``UserDetailView``::
+
+    # users/views.py
+    from django.views import generic
+    from django.shorcuts import redirect
+
+    from users.models import User
+
+
+    class UserDetailView(generic.Detail):
+        model = UserSlug
+        context_object_name = 'user'
+        slug_field = 'username'
+        template_name = 'users/detail.html'
+
+        def get(self, request, *args, **kwargs):
+            obj = self.get_object()
+
+            # The slug retrieved is a redirection to a new one
+            if obj.redirect:
+
+                # Retrieve the current slug used
+                current = obj.current
+
+                return redirect('user_detail', username=current.slug)
+
+            # Retrieve the real object affected to the slug
+            self.object = obj.content_object
+
+            context = self.get_context_data(object=self.object)
+
+            return self.render_to_response(context)
+
+
+Let's rewrite it with `django-multiurl`_ to dispatch our slug management between
+multiple views without having to rewrite the ``get`` method of the ``DetailView``::
+
+    # users/views.py
+
+    from django.views import generic
+
+    from users.models import User, UserSlug
+
+    class UserDetailView(generic.Detail):
+        model = User
+        context_object_name = 'slug'
+        slug_field = 'username'
+        template_name = 'users/detail.html'
+
+
+    class UserRedirectView(generic.RedirectView):
+        permanent = True
+
+        def get_redirect_url(self, username):
+            slug = get_object_or_404(UserSlug.objects.filter(redirect=True), slug=username)
+
+            return reverse('user_detail', args=(slug.current.slug,))
+
+    # users/urls.py
+
+    from multiurl import multiurl, ContinueResolving
+
+    from django.http import Http404
+
+    from users import views
+
+    urlpatterns = patterns('',
+        multiurl(
+            url(r'^users/(?P<username>\w+)/$',
+                views.UserDetailView.as_view(),
+                name='user_detail'),
+            url(r'^users/(?P<username>\w+)/$',
+                views.UserRedirectView.as_view(),
+                name='user_redirect'),
+            catch = (Http404, ContinueResolving)
+        )
+    )
+
+
+Hidden features
+---------------
+
+...
 
 .. _`contenttypes`: https://docs.djangoproject.com/en/dev/ref/contrib/contenttypes/
 .. _`django-sluggable`: https://github.com/thoas/django-sluggable
+.. _`Class-based views`: https://docs.djangoproject.com/en/dev/topics/class-based-views/
+.. _`django-multiurl`: https://github.com/jacobian/django-multiurl
