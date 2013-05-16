@@ -82,43 +82,47 @@ class SlugManager(models.Manager):
         return generate_unique_slug(qs, instance, slug, max_length,
                                     'slug', index_sep)
 
-    def update_slug(self, instance, slug, erase_redirects=False):
+    def update_slug(self, instance, slug,
+                    erase_redirects=False,
+                    created=False):
         content_type = ContentType.objects.get_for_model(instance)
 
         pk = instance.pk
 
-        try:
-            filters = {
-                'content_type': content_type,
-                'object_id': pk,
-                'redirect': False,
-            }
-            current = self.get(**filters)
-            new = False
-            update = current.slug != slug
-        except self.model.DoesNotExist:
-            new = True
-            update = True
+        update = False
+        affected = True
+        filters = {
+            'content_type': content_type,
+            'object_id': pk,
+            'redirect': False,
+            'slug': slug,
+        }
 
-        if update:
-            filters = {
-                'content_type': content_type,
-                'object_id': pk,
-            }
+        if not created:
+            try:
+                current = self.get(**filters)
+                new = False
+                update = current.slug != slug
+            except self.model.DoesNotExist:
+                new = True
+                update = True
 
-            qs = self.filter(**filters).exclude(slug=slug)
+        if created or update:
+            if not created:
+                base_qs = self.filter(content_type=content_type,
+                                      object_id=pk)
 
-            if not new and erase_redirects:
-                qs.delete()
-            else:
-                qs.update(redirect=True)
+                qs = base_qs.exclude(slug=slug)
 
-            filters['slug'] = slug
+                if not new and erase_redirects:
+                    qs.delete()
+                else:
+                    qs.update(redirect=True)
 
-            affected = self.filter(**filters).update(redirect=False)
+                affected = base_qs.filter(slug=slug).update(redirect=False)
 
-            if not affected:
-                slug = self.model(**dict({'redirect': False}, **filters))
+            if not affected or created:
+                slug = self.model(**filters)
                 slug.save()
 
 

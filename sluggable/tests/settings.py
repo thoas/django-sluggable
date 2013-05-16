@@ -20,4 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'sluggable',
     'sluggable.tests',
+    'django_nose',
 ]
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'

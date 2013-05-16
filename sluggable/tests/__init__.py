@@ -8,7 +8,8 @@ class SluggableTests(TestCase):
         self.assertEquals(PollSlug.sluggable_models, [Poll])
 
     def test_slug_without_populate_from(self):
-        user = User.objects.create(username='thoas')
+        with self.assertNumQueries(4):
+            user = User.objects.create(username='thoas')
 
         self.assertEquals(UserSlug.objects.count(), 1)
 
@@ -41,6 +42,11 @@ class SluggableTests(TestCase):
         user.save()
 
         self.assertEquals(user.username, 'thoas')
+
+        user = User.objects.get(username='thoas')
+
+        with self.assertNumQueries(2):
+            user.save()
 
     def test_changed(self):
         poll = Poll.objects.create(question='Quick test')

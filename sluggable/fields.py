@@ -103,7 +103,9 @@ class SluggableField(models.SlugField):
 
     def instance_post_save(self, instance, **kwargs):
         if getattr(instance, self.name).changed:
-            self.decider.objects.update_slug(instance, getattr(instance, self.name))
+            self.decider.objects.update_slug(instance,
+                                             getattr(instance, self.name),
+                                             created=kwargs.get('created', False))
 
         getattr(instance, self.name).changed = False
 
