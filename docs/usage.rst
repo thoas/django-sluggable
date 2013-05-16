@@ -166,7 +166,7 @@ Wait? ``UserDetailView.get`` is big.
 
 .. image:: http://ragefaces.s3.amazonaws.com/503e3b03ae7c700dcb000057/1e6b90eb5b4fd404356004c534bfa613.png
 
-Let's rewrite it with `django-multiurl`_ to dispatch our slug management betwee
+Let's rewrite it with `django-multiurl`_ to dispatch our slug management between
 multiple views.
 
 With this new method, we don't have to rewrite ``UserDetailView.get`` anymore::
