@@ -48,7 +48,7 @@ copyright = u'2013, 2012, Florent Messa and contributors'
 # built documents.
 #
 try:
-    from rq_mail import __version__
+    from sluggable import __version__
     # The short X.Y version.
     version = '.'.join(__version__.split('.')[:2])
     # The full version, including alpha/beta/rc tags.
