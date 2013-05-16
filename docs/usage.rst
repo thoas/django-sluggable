@@ -126,7 +126,7 @@ So we have defined a pretty standard view to show an user with its username,
 so boring duh?
 
 The interesting part is the redirection provided by `django-sluggable`_, let's
-rewrite our ``UserDetailView``::
+rewrite ``UserDetailView.get``::
 
     # users/views.py
     from django.views import generic
@@ -160,8 +160,9 @@ rewrite our ``UserDetailView``::
             return self.render_to_response(context)
 
 
-Let's rewrite it with `django-multiurl`_ to dispatch our slug management between
-multiple views without having to rewrite the ``get`` method of the ``DetailView``::
+Let's rewrite it with `django-multiurl`_ to dispatch our slug management between.
+
+With this new method, we will not have to rewrite the ``DetailView.get`` method::
 
     # users/views.py
 
