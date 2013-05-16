@@ -20,9 +20,9 @@ http://django-sluggable.readthedocs.org
 Inspiration
 -----------
 
-Some code are from `django-autoslug`_ and old codebase of Ulule by `twidi`_.
+Some code are from django-autoslug_ and old codebase of Ulule by twidi_.
 
 A big thanks to them.
 
-.._ django-autoslug: https://pypi.python.org/pypi/django-autoslug
-.._ twidi: https://github.com/twidi
+.. _ django-autoslug: https://pypi.python.org/pypi/django-autoslug
+.. _ twidi: https://github.com/twidi
