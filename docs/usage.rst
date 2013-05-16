@@ -192,6 +192,8 @@ With this new method, we don't have to rewrite ``UserDetailView.get`` anymore::
 
             return reverse('user_detail', args=(slug.current.slug,))
 
+But we have to rewrite our ``urls.py`` file to use `django-multiurl`_::
+
     # users/urls.py
 
     from multiurl import multiurl, ContinueResolving
