@@ -4,6 +4,9 @@ from .models import Poll, PollSlug
 
 
 class SluggableTests(TestCase):
+    def test_sluggable_models_for_decider(self):
+        self.assertEquals(PollSlug.sluggable_models, [Poll])
+
     def test_simple_add(self):
         poll = Poll.objects.create(question='Quick test')
 
