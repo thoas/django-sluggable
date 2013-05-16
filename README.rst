@@ -24,5 +24,5 @@ Some code are from django-autoslug_ and old codebase of Ulule by twidi_.
 
 A big thanks to them.
 
-.. _ django-autoslug: https://pypi.python.org/pypi/django-autoslug
-.. _ twidi: https://github.com/twidi
+.. _django-autoslug: https://pypi.python.org/pypi/django-autoslug
+.. _twidi: https://github.com/twidi
