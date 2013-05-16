@@ -44,6 +44,30 @@ class SluggableTests(TestCase):
 
         self.assertFalse(current.redirect)
 
+    def test_redirect_restore_previous_slug(self):
+        poll = Poll.objects.create(question='Quick test')
+        poll.question = 'Another test'
+        poll.save()
+
+        poll.slug = 'quick-test-2'
+        poll.save()
+
+        self.assertEquals(PollSlug.objects.count(), 2)
+
+        poll.slug = 'quick-test'
+        poll.save()
+
+        self.assertEquals(PollSlug.objects.count(), 2)
+
+        slug = PollSlug.objects.get(slug='quick-test')
+        self.assertFalse(slug.redirect)
+
+        self.assertEquals(PollSlug.objects.filter(redirect=False).count(), 1)
+
+        current = PollSlug.objects.get_current(poll)
+
+        self.assertEquals(current.slug, 'quick-test')
+
     def test_is_slug_available(self):
         poll = Poll.objects.create(question='Quick test')
 

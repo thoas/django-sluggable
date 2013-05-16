@@ -98,7 +98,8 @@ class SluggableField(models.SlugField):
         return None
 
     def instance_post_save(self, instance, **kwargs):
-        self.decider.objects.update_slug(instance, instance.slug)
+        if getattr(instance, self.name).changed:
+            self.decider.objects.update_slug(instance, instance.slug)
 
     def instance_post_delete(self, instance, **kwargs):
         self.decider.objects.filter_by_obj(instance).delete()
