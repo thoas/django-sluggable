@@ -42,6 +42,9 @@ class SlugManager(models.Manager):
     def filter_by_obj(self, *args, **kwargs):
         return self.get_query_set().filter_by_obj(*args, **kwargs)
 
+    def filter_by_obj_id(self, *args, **kwargs):
+        return self.get_query_set().filter_by_obj_id(*args, **kwargs)
+
     def filter_by_model(self, *args, **kwargs):
         return self.get_query_set().filter_by_model(*args, **kwargs)
 
@@ -51,8 +54,8 @@ class SlugManager(models.Manager):
 
             if not content_type:
                 content_type = ContentType.objects.get_for_model(obj)
-
-        obj_id = obj
+        else:
+            obj_id = obj
 
         try:
             return self.filter_by_obj_id(obj_id,
@@ -62,7 +65,7 @@ class SlugManager(models.Manager):
             return None
 
     def is_slug_available(self, slug, obj=None):
-        if slug in self.get_forbidden_slugs():
+        if slug in self.model.forbidden_slugs():
             return False
 
         qs = self.filter(slug=slug)
@@ -140,7 +143,8 @@ class Slug(models.Model):
     class Meta:
         abstract = True
 
-    def get_forbidden_slugs(self):
+    @classmethod
+    def forbidden_slugs(self):
         return []
 
     def get_current(self):

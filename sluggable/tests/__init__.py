@@ -19,6 +19,8 @@ class SluggableTests(TestCase):
 
         self.assertEquals(slug.content_object, poll)
 
+    def test_redirect(self):
+        poll = Poll.objects.create(question='Quick test')
         poll.question = 'Another test'
         poll.save()
 
@@ -35,3 +37,25 @@ class SluggableTests(TestCase):
 
         slug = PollSlug.objects.get(slug='quick-test')
         self.assertTrue(slug.redirect)
+
+        current = PollSlug.objects.get_current(poll)
+
+        self.assertFalse(current is None)
+
+        self.assertFalse(current.redirect)
+
+    def test_is_slug_available(self):
+        poll = Poll.objects.create(question='Quick test')
+
+        self.assertFalse(PollSlug.objects.is_slug_available('quick-test'))
+
+        self.assertTrue(PollSlug.objects.is_slug_available('quick-test', obj=poll))
+
+    def test_delete(self):
+        poll = Poll.objects.create(question='Quick test')
+
+        self.assertEquals(PollSlug.objects.count(), 1)
+
+        poll.delete()
+
+        self.assertEquals(PollSlug.objects.count(), 0)
