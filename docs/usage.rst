@@ -4,8 +4,8 @@
 Usage
 =====
 
-Integrating in an application
------------------------------
+Integrated in an application
+----------------------------
 
 To use `django-sluggable`_ we will provide a basic application in this section.
 
@@ -89,14 +89,16 @@ for that::
     In [12]: Slug.objects.get_current(user)
     <Slug oleiade for oleiade>
 
-Working with class-based views
-------------------------------
+Work with class-based views
+---------------------------
 
-Now you know how to manipulate your users (oh yeah), we will add real world
+Now you know how to manipulate your users, we will add real world
 examples in an real application.
 
-Let's begin with ``views.py``, this section will only use `Class-based views`_
-so if you are not familiar with them, go check them they are awesome ;o)::
+Let's begin with the ``views.py`` file.
+
+In this section, we will only use `Class-based views`_ so if you are not
+familiar with them, go check them they are awesome::
 
     # users/views.py
     from django.views import generic
@@ -160,9 +162,14 @@ rewrite ``UserDetailView.get``::
             return self.render_to_response(context)
 
 
-Let's rewrite it with `django-multiurl`_ to dispatch our slug management between.
+Wait? ``UserDetailView.get`` is big.
 
-With this new method, we will not have to rewrite the ``DetailView.get`` method::
+.. image:: http://ragefaces.s3.amazonaws.com/503e3b03ae7c700dcb000057/1e6b90eb5b4fd404356004c534bfa613.png
+
+Let's rewrite it with `django-multiurl`_ to dispatch our slug management betwee
+multiple views.
+
+With this new method, we don't have to rewrite ``UserDetailView.get`` anymore::
 
     # users/views.py
 
@@ -204,6 +211,8 @@ With this new method, we will not have to rewrite the ``DetailView.get`` method:
             catch = (Http404, ContinueResolving)
         )
     )
+
+.. image:: http://ragefaces.s3.amazonaws.com/5041ed6dae7c704f08000007/85cbfbcb8f496826ca8867bd28e0d3b9.png
 
 
 Hidden features
