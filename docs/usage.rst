@@ -220,7 +220,33 @@ But we have to rewrite our ``urls.py`` file to use `django-multiurl`_::
 Hidden features
 ---------------
 
-...
+How know if the slug has changed?::
+
+    In [1]: user = User.objects.create(username="thoas")
+    In [2]: user.slug.changed
+    False
+    In [3]: user.slug = 'oleiade'
+    In [4]: user.slug.changed
+    True
+
+How to know if a slug is available or not?::
+
+    In [1]: user = User.objects.create(username="thoas")
+    In [2]: UserSlug.objects.is_slug_available('thoas')
+    False
+    In [3]: user.slug = 'oleiade'
+    In [4]: user.save()
+    In [5]: UserSlug.objects.is_slug_available('thoas')
+    False
+
+If you are providing an optional ``obj`` parameter which has the slug::
+
+    In [6]: UserSlug.objects.is_slug_available('thoas', obj=user)
+    True
+
+Restore previous slug and remove redirections::
+
+    In [7]: UserSlug.objects.update_slug(user, 'thoas', erase_redirects=True)
 
 .. _`contenttypes`: https://docs.djangoproject.com/en/dev/ref/contrib/contenttypes/
 .. _`django-sluggable`: https://github.com/thoas/django-sluggable
