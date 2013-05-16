@@ -149,7 +149,3 @@ class Slug(models.Model):
 
         return Slug.objects.get_current_for_obj(self.object_id,
                                                 content_type=self.content_type_id)
-
-
-class SluggableMixin(object):
-    pass
