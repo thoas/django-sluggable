@@ -16,3 +16,12 @@ class Poll(models.Model):
 
     def __unicode__(self):
         return self.question
+
+
+class UserSlug(Slug):
+    class Meta:
+        abstract = False
+
+
+class User(models.Model):
+    username = SluggableField(decider=UserSlug)

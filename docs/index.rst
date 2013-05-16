@@ -16,6 +16,7 @@ For further details see the reference documentation:
 
    installation
    usage
+   architecture
 
 
 Indices and tables
