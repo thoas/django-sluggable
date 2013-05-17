@@ -4,27 +4,6 @@ from django.db import models
 from . import settings, utils
 
 
-class ValueContainer(object):
-    def __init__(self, value):
-        self.value = value
-        self.changed = False
-
-    def __unicode__(self):
-        return self.value
-
-    def __eq__(self, other):
-        if hasattr(other, 'value'):
-            return self.value == other.value
-
-        return self.value == other
-
-    def __nonzero__(self):
-        return bool(self.value)
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-
 class SluggableObjectDescriptor(object):
     def __init__(self, field_with_rel):
         self.field = field_with_rel
@@ -41,16 +20,13 @@ class SluggableObjectDescriptor(object):
         return val
 
     def __set__(self, instance, value):
-        value = self.field.attr_class(value)
-
         instance.__dict__[self.field.attname] = value
 
-        value.changed = True
+        setattr(instance, '%s_changed' % self.field.attname, True)
 
 
 class SluggableField(models.SlugField):
     descriptor_class = SluggableObjectDescriptor
-    attr_class = ValueContainer
 
     def __init__(self, *args, **kwargs):
         self.decider = kwargs.pop('decider', None)
@@ -77,10 +53,11 @@ class SluggableField(models.SlugField):
         self.decider.sluggable_models.append(cls)
 
         setattr(cls, self.name, self.descriptor_class(self))
+        setattr(cls, '%s_changed' % self.name, True)
 
     def instance_post_init(self, instance, *args, **kwargs):
         if instance.pk:
-            getattr(instance, self.name).changed = False
+            setattr(instance, '%s_changed' % self.name, False)
 
     def instance_pre_save(self, instance, *args, **kwargs):
         original_value = value = self.value_from_object(instance)
@@ -88,7 +65,7 @@ class SluggableField(models.SlugField):
         if self.always_update or (self.populate_from and not value):
             value = utils.get_prepopulated_value(instance, self.populate_from)
 
-        if value and (original_value != value or getattr(instance, self.name).changed):
+        if value and (original_value != value or getattr(instance, '%s_changed' % self.name, False)):
             slug = utils.crop_slug(self.slugify(value), self.max_length)
 
             slug = self.decider.objects.generate_unique_slug(instance, slug,
@@ -102,12 +79,12 @@ class SluggableField(models.SlugField):
         return None
 
     def instance_post_save(self, instance, **kwargs):
-        if getattr(instance, self.name).changed:
+        if getattr(instance, '%s_changed' % self.name, False):
             self.decider.objects.update_slug(instance,
                                              getattr(instance, self.name),
                                              created=kwargs.get('created', False))
 
-        getattr(instance, self.name).changed = False
+        setattr(instance, '%s_changed' % self.name, False)
 
     def instance_post_delete(self, instance, **kwargs):
         self.decider.objects.filter_by_obj(instance).delete()

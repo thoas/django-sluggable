@@ -53,15 +53,15 @@ class SluggableTests(TestCase):
     def test_changed(self):
         poll = Poll.objects.create(question='Quick test')
 
-        self.assertFalse(poll.slug.changed)
+        self.assertFalse(poll.slug_changed)
 
         poll = Poll.objects.get(slug='quick-test')
 
-        self.assertFalse(poll.slug.changed)
+        self.assertFalse(poll.slug_changed)
 
         poll = Poll(question='Quick test')
 
-        self.assertTrue(poll.slug.changed)
+        self.assertTrue(poll.slug_changed)
 
         poll.save()
 
