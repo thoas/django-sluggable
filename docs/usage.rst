@@ -223,10 +223,10 @@ Hidden features
 How know if the slug has changed?::
 
     In [1]: user = User.objects.create(username="thoas")
-    In [2]: user.slug.changed
+    In [2]: user.slug_changed
     False
     In [3]: user.slug = 'oleiade'
-    In [4]: user.slug.changed
+    In [4]: user.slug_changed
     True
 
 How to know if a slug is available or not?::
