@@ -4,6 +4,7 @@ from django.contrib.contenttypes import generic
 from django.utils.translation import ugettext_lazy as _
 from django.db.models.query import QuerySet
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.encoding import python_2_unicode_compatible
 
 
 from .utils import get_obj_id, generate_unique_slug
@@ -126,6 +127,7 @@ class SlugManager(models.Manager):
                 slug.save()
 
 
+@python_2_unicode_compatible
 class Slug(models.Model):
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
@@ -143,8 +145,8 @@ class Slug(models.Model):
     class Meta:
         abstract = True
 
-    def __unicode__(self):
-        return _(u'%s for %s') % (self.slug, self.content_object)
+    def __str__(self):
+        return _('%s for %s') % (self.slug, self.content_object)
 
     @classmethod
     def forbidden_slugs(self):
