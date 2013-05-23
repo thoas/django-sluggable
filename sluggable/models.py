@@ -140,6 +140,8 @@ class Slug(models.Model):
     redirect = models.BooleanField(default=False,
                                    verbose_name=_('Redirection'))
 
+    created = models.DateTimeField(auto_now_add=True)
+
     objects = SlugManager()
 
     class Meta:
