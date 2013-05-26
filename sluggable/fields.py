@@ -3,6 +3,11 @@ from django.db import models
 
 from . import settings, utils
 
+try:
+    from south.modelsinspector import introspector
+except ImportError:
+    introspector = lambda self: [], {}
+
 
 class SluggableObjectDescriptor(object):
     def __init__(self, field_with_rel):
@@ -47,10 +52,11 @@ class SluggableField(models.SlugField):
         signals.post_save.connect(self.instance_post_save, sender=cls)
         signals.post_delete.connect(self.instance_post_delete, sender=cls)
 
-        if not hasattr(self.decider, 'sluggable_models'):
-            self.decider.sluggable_models = []
+        if self.decider:
+            if not hasattr(self.decider, 'sluggable_models'):
+                self.decider.sluggable_models = []
 
-        self.decider.sluggable_models.append(cls)
+            self.decider.sluggable_models.append(cls)
 
         setattr(cls, self.name, self.descriptor_class(self))
         setattr(cls, '%s_changed' % self.name, True)
@@ -100,3 +106,9 @@ class SluggableField(models.SlugField):
             return None
 
         return unicode(value)
+
+    def south_field_triple(self):
+        "Returns a suitable description of this field for South."
+        args, kwargs = introspector(self)
+        kwargs.update({'populate_from': 'None'})
+        return ('sluggable.fields.SluggableField', args, kwargs)
