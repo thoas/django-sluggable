@@ -21,15 +21,14 @@ a specific user is changing his username: we want a permanent redirection
 between the old username and the new one.
 
 
-In ``models.py``, we will define a decider model which will store all usernames::
+In ``models.py``, we will define a slugs model which will store all usernames::
 
     # users/models.py
     from sluggable.models import Slug
 
 
     class UserSlug(Slug):
-        class Meta:
-            abstract = False
+        pass
 
 In the case of our ``User`` class the slug is basically the username of the user,
 so we will change the type of the ``username`` field.
@@ -37,11 +36,12 @@ so we will change the type of the ``username`` field.
 ::
 
     # users/models.py
+    from django.contrib.contenttypes import generic
     from sluggable.fields import SluggableField
 
-
     class User(models.Model):
-        username = SluggableField(decider=UserSlug)
+        username = SluggableField(unique=True)
+        slugs = generic.GenericRelation(UserSlug)
 
         def __unicode__(self):
             return self.username
@@ -215,6 +215,21 @@ But we have to rewrite our ``urls.py`` file to use `django-multiurl`_::
     )
 
 .. image:: http://ragefaces.s3.amazonaws.com/5041ed6dae7c704f08000007/85cbfbcb8f496826ca8867bd28e0d3b9.png
+
+
+Unique with
+-----------
+
+You can specify a ``unique_with`` argument to ``SluggableField`` in order to
+restrict slugs to uniqueness only per the fields specified. For example::
+
+    class PostSlug(Slug):
+        pass
+
+    class Post(models.Model):
+        category = models.CharField(max_length=100)
+        slug = SluggableField(unique_with=('category',))
+        slugs = generic.GenericRelation(PostSlug)
 
 
 Hidden features

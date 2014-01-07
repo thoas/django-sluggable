@@ -1,14 +1,13 @@
 from __future__ import unicode_literals
 
+from datetime import date
+
 from django.test import TestCase
 
-from .models import Poll, PollSlug, UserSlug, User
+from .models import Poll, PollSlug, UserSlug, User, Post, DayPost, PostSlug
 
 
 class SluggableTests(TestCase):
-    def test_sluggable_models_for_decider(self):
-        self.assertEquals(PollSlug.sluggable_models, [Poll])
-
     def test_slug_without_populate_from(self):
         with self.assertNumQueries(4):
             user = User.objects.create(username='thoas')
@@ -144,3 +143,34 @@ class SluggableTests(TestCase):
         poll.delete()
 
         self.assertEquals(PollSlug.objects.count(), 0)
+
+    def _unique_with(self, cls, typ, thing1, thing2):
+        post1 = cls.objects.create(**{ typ:thing1, 'slug':'a-slug' })
+        post2 = cls.objects.create(**{ typ:thing1, 'slug':'a-slug' })
+        post3 = cls.objects.create(**{ typ:thing1, 'slug':'a-different-slug' })
+        post4 = cls.objects.create(**{ typ:thing2, 'slug':'a-slug' })
+
+        self.assertEquals(PostSlug.objects.count(), 4)
+
+        self.assertEquals(post1.slug, 'a-slug')
+        self.assertEquals(post2.slug, 'a-slug-2')
+        self.assertEquals(post3.slug, 'a-different-slug')
+        self.assertEquals(post4.slug, 'a-slug')
+
+        post2.slug = 'a-different-slug'
+        post2.save()
+        post4.slug = 'a-different-slug'
+        post4.save()
+
+        self.assertEquals(PostSlug.objects.count(), 6)
+        self.assertEquals(post2.slug, 'a-different-slug-2')
+        self.assertEquals(post4.slug, 'a-different-slug')
+
+    def test_unique_with(self):
+        user1 = User.objects.create(username='matthew')
+        user2 = User.objects.create(username='peter')
+
+        self._unique_with(Post, 'user', user1, user2)
+
+    def test_unique_with_date(self):
+        self._unique_with(DayPost, 'date', date(2014, 1, 1), date(2014, 2, 1))

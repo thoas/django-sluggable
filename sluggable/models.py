@@ -7,7 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils.encoding import python_2_unicode_compatible
 
 
-from .utils import get_obj_id, generate_unique_slug
+from .utils import get_obj_id
 
 
 class SlugQuerySet(QuerySet):
@@ -76,13 +76,6 @@ class SlugManager(models.Manager):
 
         return True
 
-    def generate_unique_slug(self, instance, slug, max_length, index_sep):
-
-        qs = self.filter_by_obj(instance, exclude=True)
-
-        return generate_unique_slug(qs, instance, slug, max_length,
-                                    'slug', index_sep)
-
     def update_slug(self, instance, slug,
                     erase_redirects=False,
                     created=False):
@@ -135,8 +128,7 @@ class Slug(models.Model):
 
     slug = models.CharField(max_length=255,
                             verbose_name=_('URL'),
-                            db_index=True,
-                            unique=True)
+                            db_index=True)
     redirect = models.BooleanField(default=False,
                                    verbose_name=_('Redirection'))
 

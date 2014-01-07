@@ -1,5 +1,6 @@
 from django.db.models import signals
 from django.db import models
+from django.utils import six
 
 from . import settings, utils
 
@@ -34,13 +35,22 @@ class SluggableField(models.SlugField):
     descriptor_class = SluggableObjectDescriptor
 
     def __init__(self, *args, **kwargs):
-        self.decider = kwargs.pop('decider', None)
         self.populate_from = kwargs.pop('populate_from', None)
         self.always_update = kwargs.pop('always_update', False)
         self.index_sep = kwargs.pop('sep', settings.SLUGGABLE_SEPARATOR)
         self.manager = kwargs.pop('manager', None)
+
+        # unique_with value can be string or tuple
+        self.unique_with = kwargs.pop('unique_with', ())
+        if isinstance(self.unique_with, six.string_types):
+            self.unique_with = (self.unique_with,)
+
         self.slugify = kwargs.pop('slugify', settings.slugify)
         assert hasattr(self.slugify, '__call__')
+
+        if self.unique_with:
+            # we will do "manual" granular check below
+            kwargs['unique'] = False
 
         super(SluggableField, self).__init__(*args, **kwargs)
 
@@ -51,12 +61,6 @@ class SluggableField(models.SlugField):
         signals.pre_save.connect(self.instance_pre_save, sender=cls)
         signals.post_save.connect(self.instance_post_save, sender=cls)
         signals.post_delete.connect(self.instance_post_delete, sender=cls)
-
-        if self.decider:
-            if not hasattr(self.decider, 'sluggable_models'):
-                self.decider.sluggable_models = []
-
-            self.decider.sluggable_models.append(cls)
 
         setattr(cls, self.name, self.descriptor_class(self))
         setattr(cls, '%s_changed' % self.name, True)
@@ -74,9 +78,9 @@ class SluggableField(models.SlugField):
         if value and (original_value != value or getattr(instance, '%s_changed' % self.name, False)):
             slug = utils.crop_slug(self.slugify(value), self.max_length)
 
-            slug = self.decider.objects.generate_unique_slug(instance, slug,
-                                                             self.max_length,
-                                                             self.index_sep)
+            # ensure the slug is unique (if required)
+            if self.unique or self.unique_with:
+                slug = utils.generate_unique_slug(self, instance, slug, self.manager)
 
             setattr(instance, self.name, slug)
 
@@ -86,14 +90,14 @@ class SluggableField(models.SlugField):
 
     def instance_post_save(self, instance, **kwargs):
         if getattr(instance, '%s_changed' % self.name, False):
-            self.decider.objects.update_slug(instance,
+            instance.slugs.update_slug(instance,
                                              getattr(instance, self.name),
                                              created=kwargs.get('created', False))
 
         setattr(instance, '%s_changed' % self.name, False)
 
     def instance_post_delete(self, instance, **kwargs):
-        self.decider.objects.filter_by_obj(instance).delete()
+        instance.slugs.filter_by_obj(instance).delete()
 
     def get_prep_lookup(self, lookup_type, value):
         if hasattr(value, 'value'):
@@ -110,5 +114,8 @@ class SluggableField(models.SlugField):
     def south_field_triple(self):
         "Returns a suitable description of this field for South."
         args, kwargs = introspector(self)
-        kwargs.update({'populate_from': 'None'})
+        kwargs.update({
+            'populate_from': 'None' if callable(self.populate_from) else repr(self.populate_from),
+            'unique_with': repr(self.unique_with),
+        })
         return ('sluggable.fields.SluggableField', args, kwargs)
