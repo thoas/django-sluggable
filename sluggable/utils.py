@@ -100,9 +100,7 @@ def get_uniqueness_lookups(field, instance, unique_with):
                              % (instance._meta.object_name, field_name))
 
         value = getattr(instance, field_name)
-        if not value:
-            if other_field.blank:
-                break
+        if not value and not other_field.blank:
             raise ValueError('Could not check uniqueness of %s.%s with'
                              ' respect to %s.%s because the latter is empty.'
                              ' Please ensure that "%s" is declared *after*'

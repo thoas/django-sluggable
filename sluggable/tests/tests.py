@@ -4,7 +4,7 @@ from datetime import date
 
 from django.test import TestCase
 
-from .models import Poll, PollSlug, UserSlug, User, Post, DayPost, PostSlug
+from .models import Poll, PollSlug, UserSlug, User, Post, DayPost, WordPost, PostSlug
 
 
 class SluggableTests(TestCase):
@@ -174,3 +174,18 @@ class SluggableTests(TestCase):
 
     def test_unique_with_date(self):
         self._unique_with(DayPost, 'date', date(2014, 1, 1), date(2014, 2, 1))
+
+    def test_unique_with_blank_word(self):
+        user = User.objects.create(username='matthew')
+
+        post1 = WordPost.objects.create(user=user, word='word', slug='a-slug')
+        post2 = WordPost.objects.create(user=user, word='word', slug='a-slug')
+        post3 = WordPost.objects.create(user=user, word='', slug='a-slug')
+        post4 = WordPost.objects.create(user=user, word='', slug='a-slug')
+
+        self.assertEquals(PostSlug.objects.count(), 4)
+
+        self.assertEquals(post1.slug, 'a-slug')
+        self.assertEquals(post2.slug, 'a-slug-2')
+        self.assertEquals(post3.slug, 'a-slug')
+        self.assertEquals(post4.slug, 'a-slug-2')

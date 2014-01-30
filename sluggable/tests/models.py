@@ -42,3 +42,9 @@ class DayPost(models.Model):
     date = models.DateField()
     slug = SluggableField(unique_with='date')
     slugs = generic.GenericRelation(PostSlug)
+
+class WordPost(models.Model):
+    user = models.ForeignKey(User)
+    word = models.CharField(max_length=50, blank=True)
+    slug = SluggableField(unique_with=('user', 'word'))
+    slugs = generic.GenericRelation(PostSlug)
