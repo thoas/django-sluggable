@@ -7,35 +7,35 @@ from .models import Poll, PollSlug, UserSlug, User
 
 class SluggableTests(TestCase):
     def test_sluggable_models_for_decider(self):
-        self.assertEquals(PollSlug.sluggable_models, [Poll])
+        self.assertEqual(PollSlug.sluggable_models, [Poll])
 
     def test_slug_without_populate_from(self):
         with self.assertNumQueries(4):
             user = User.objects.create(username='thoas')
 
-        self.assertEquals(UserSlug.objects.count(), 1)
+        self.assertEqual(UserSlug.objects.count(), 1)
 
         user.username = 'oleiade'
         user.save()
 
-        self.assertEquals(UserSlug.objects.count(), 2)
+        self.assertEqual(UserSlug.objects.count(), 2)
 
         current = UserSlug.objects.get_current(user)
 
-        self.assertEquals(current.slug, 'oleiade')
+        self.assertEqual(current.slug, 'oleiade')
 
         user.username = 'thoas'
         user.save()
 
         current = UserSlug.objects.get_current(user)
 
-        self.assertEquals(current.slug, 'thoas')
+        self.assertEqual(current.slug, 'thoas')
 
-        self.assertEquals(UserSlug.objects.filter(redirect=True).count(), 1)
+        self.assertEqual(UserSlug.objects.filter(redirect=True).count(), 1)
 
         user = User.objects.create(username='thoas')
 
-        self.assertEquals(user.username, 'thoas-2')
+        self.assertEqual(user.username, 'thoas-2')
 
         old = User.objects.get(username='thoas')
         old.delete()
@@ -43,7 +43,7 @@ class SluggableTests(TestCase):
         user.username = 'thoas'
         user.save()
 
-        self.assertEquals(user.username, 'thoas')
+        self.assertEqual(user.username, 'thoas')
 
     def test_changed(self):
         poll = Poll.objects.create(question='Quick test')
@@ -60,34 +60,34 @@ class SluggableTests(TestCase):
 
         poll.save()
 
-        self.assertEquals(poll.slug, 'quick-test-2')
+        self.assertEqual(poll.slug, 'quick-test-2')
 
     def test_simple_add(self):
         poll = Poll.objects.create(question='Quick test')
 
-        self.assertEquals(poll.slug, u'quick-test')
+        self.assertEqual(poll.slug, u'quick-test')
 
-        self.assertEquals(PollSlug.objects.count(), 1)
+        self.assertEqual(PollSlug.objects.count(), 1)
 
         slug = PollSlug.objects.get(slug='quick-test')
 
-        self.assertEquals(slug.slug, 'quick-test')
+        self.assertEqual(slug.slug, 'quick-test')
 
         self.assertFalse(slug.redirect)
 
-        self.assertEquals(slug.content_object, poll)
+        self.assertEqual(slug.content_object, poll)
 
     def test_redirect(self):
         poll = Poll.objects.create(question='Quick test')
         poll.question = 'Another test'
         poll.save()
 
-        self.assertEquals(poll.slug, u'quick-test')
+        self.assertEqual(poll.slug, u'quick-test')
 
         poll.slug = 'quick-test-2'
         poll.save()
 
-        self.assertEquals(PollSlug.objects.count(), 2)
+        self.assertEqual(PollSlug.objects.count(), 2)
 
         slug = PollSlug.objects.get(slug='quick-test-2')
 
@@ -99,7 +99,7 @@ class SluggableTests(TestCase):
 
         current = PollSlug.objects.get_current(poll)
 
-        self.assertEquals(old.current, slug)
+        self.assertEqual(old.current, slug)
 
         self.assertFalse(current is None)
 
@@ -113,21 +113,21 @@ class SluggableTests(TestCase):
         poll.slug = 'quick-test-2'
         poll.save()
 
-        self.assertEquals(PollSlug.objects.count(), 2)
+        self.assertEqual(PollSlug.objects.count(), 2)
 
         poll.slug = 'quick-test'
         poll.save()
 
-        self.assertEquals(PollSlug.objects.count(), 2)
+        self.assertEqual(PollSlug.objects.count(), 2)
 
         slug = PollSlug.objects.get(slug='quick-test')
         self.assertFalse(slug.redirect)
 
-        self.assertEquals(PollSlug.objects.filter(redirect=False).count(), 1)
+        self.assertEqual(PollSlug.objects.filter(redirect=False).count(), 1)
 
         current = PollSlug.objects.get_current(poll)
 
-        self.assertEquals(current.slug, 'quick-test')
+        self.assertEqual(current.slug, 'quick-test')
 
     def test_is_slug_available(self):
         poll = Poll.objects.create(question='Quick test')
@@ -139,8 +139,8 @@ class SluggableTests(TestCase):
     def test_delete(self):
         poll = Poll.objects.create(question='Quick test')
 
-        self.assertEquals(PollSlug.objects.count(), 1)
+        self.assertEqual(PollSlug.objects.count(), 1)
 
         poll.delete()
 
-        self.assertEquals(PollSlug.objects.count(), 0)
+        self.assertEqual(PollSlug.objects.count(), 0)

@@ -1,6 +1,12 @@
+import django
+
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
+try:
+    from django.contrib.contenttypes.fields import GenericForeignKey
+except ImportError:
+    from django.contrib.contenttypes.generic import GenericForeignKey  # noqa
+
 from django.utils.translation import ugettext_lazy as _
 from django.db.models.query import QuerySet
 from django.core.exceptions import ObjectDoesNotExist
@@ -34,17 +40,20 @@ class SlugQuerySet(QuerySet):
 
 
 class SlugManager(models.Manager):
-    def get_query_set(self):
+    def get_queryset(self):
         return SlugQuerySet(self.model)
 
+    if django.VERSION < (1, 6):
+        get_query_set = get_queryset
+
     def filter_by_obj(self, *args, **kwargs):
-        return self.get_query_set().filter_by_obj(*args, **kwargs)
+        return self.get_queryset().filter_by_obj(*args, **kwargs)
 
     def filter_by_obj_id(self, *args, **kwargs):
-        return self.get_query_set().filter_by_obj_id(*args, **kwargs)
+        return self.get_queryset().filter_by_obj_id(*args, **kwargs)
 
     def filter_by_model(self, *args, **kwargs):
-        return self.get_query_set().filter_by_model(*args, **kwargs)
+        return self.get_queryset().filter_by_model(*args, **kwargs)
 
     def get_current(self, obj, content_type=None):
         if isinstance(obj, models.Model):
@@ -68,7 +77,7 @@ class SlugManager(models.Manager):
 
         qs = self.filter(slug=slug)
 
-        if not obj is None:
+        if obj is not None:
             qs = qs.filter_by_obj(obj, exclude=True)
 
         if qs.exists():
@@ -131,7 +140,7 @@ class SlugManager(models.Manager):
 class Slug(models.Model):
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
-    content_object = generic.GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey('content_type', 'object_id')
 
     slug = models.CharField(max_length=255,
                             verbose_name=_('URL'),
