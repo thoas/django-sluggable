@@ -9,26 +9,6 @@ django-sluggable
 django-sluggable is a library to manage your slugs and redirect old slugs
 to a new one. With this library, you will have the plain history of your operations.
 
-Compatibility
--------------
-
-This library is compatible with:
-
-- python2.6, django1.5
-- python2.6, django1.6
-- python2.7, django1.5
-- python2.7, django1.6
-- python2.7, django1.7
-- python2.7, django1.8
-- python3.3, django1.5
-- python3.3, django1.6
-- python3.3, django1.7
-- python3.3, django1.8
-- python3.4, django1.5
-- python3.4, django1.6
-- python3.4, django1.7
-- python3.4, django1.8
-
 Installation
 ------------
 

@@ -1,5 +1,3 @@
-import django
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -25,9 +23,6 @@ INSTALLED_APPS = [
 ]
 
 SECRET_KEY = 'blabla'
-
-if django.VERSION <= (1, 6):
-    TEST_RUNNER = 'discover_runner.DiscoverRunner'
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
