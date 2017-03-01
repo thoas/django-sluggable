@@ -14,6 +14,7 @@ from django.utils.encoding import python_2_unicode_compatible
 
 
 from .utils import get_obj_id, generate_unique_slug
+from . import settings
 
 
 class SlugQuerySet(QuerySet):
@@ -75,7 +76,10 @@ class SlugManager(models.Manager):
         if slug in self.model.forbidden_slugs():
             return False
 
-        qs = self.filter(slug=slug)
+        if settings.SLUGGABLE_CASE_SENSITIVE:
+            qs = self.filter(slug=slug)
+        else:
+            qs = self.filter(slug__iexact=slug)
 
         if obj is not None:
             qs = qs.filter_by_obj(obj, exclude=True)

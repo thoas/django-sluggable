@@ -23,3 +23,5 @@ if isinstance(slugify, str):
 
 
 SLUGGABLE_SEPARATOR = getattr(settings, 'SLUGGABLE_SEPARATOR', '-')
+
+SLUGGABLE_CASE_SENSITIVE = getattr(settings, 'SLUGGABLE_CASE_SENSITIVE', False)
