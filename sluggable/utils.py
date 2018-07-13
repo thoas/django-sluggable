@@ -16,7 +16,7 @@ def get_prepopulated_value(instance, populate_from):
     """
     Returns preliminary value based on `populate_from`.
     """
-    if hasattr(populate_from, '__call__'):
+    if hasattr(populate_from, "__call__"):
         return populate_from(instance)
 
     attr = getattr(instance, populate_from)
@@ -30,8 +30,7 @@ def crop_slug(slug, max_length):
     return slug
 
 
-def generate_unique_slug(qs, instance, slug, max_length,
-                         field_name, index_sep):
+def generate_unique_slug(qs, instance, slug, max_length, field_name, index_sep):
     """
     Generates unique slug by adding a number to given value until no model
     instance can be found with such slug. If ``unique_with`` (a tuple of field
@@ -59,13 +58,11 @@ def generate_unique_slug(qs, instance, slug, max_length,
         tail_length = len(index_sep) + len(str(index))
         combined_length = len(original_slug) + tail_length
         if max_length < combined_length:
-            original_slug = original_slug[:max_length - tail_length]
+            original_slug = original_slug[: max_length - tail_length]
 
         # re-generate the slug
-        data = dict(slug=original_slug,
-                    sep=index_sep,
-                    index=index)
+        data = dict(slug=original_slug, sep=index_sep, index=index)
 
-        slug = '%(slug)s%(sep)s%(index)d' % data
+        slug = "%(slug)s%(sep)s%(index)d" % data
 
     return slug
