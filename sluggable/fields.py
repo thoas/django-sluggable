@@ -5,11 +5,6 @@ from django.db import models
 
 from . import settings, utils
 
-try:
-    from south.modelsinspector import introspector
-except ImportError:
-    introspector = lambda self: [], {}
-
 
 class SluggableObjectDescriptor(object):
     def __init__(self, field_with_rel):
