@@ -142,7 +142,7 @@ class SlugManager(models.Manager):
 
 @python_2_unicode_compatible
 class Slug(models.Model):
-    content_type = models.ForeignKey(ContentType)
+    content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
 

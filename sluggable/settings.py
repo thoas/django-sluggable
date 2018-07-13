@@ -18,7 +18,11 @@ if not slugify:
 
 # find callable by string
 if isinstance(slugify, str):
-    from django.core.urlresolvers import get_callable
+    try:
+        from django.core.urlresolvers import get_callable
+    except ImportError:
+        from django.urls.resolvers import get_callable
+
     slugify = get_callable(slugify)
 
 
