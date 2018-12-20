@@ -77,12 +77,30 @@ class SluggableTests(TestCase):
 
         self.assertEqual(slug.content_object, poll)
 
-    def test_simple_add_when_slugfield_is_nullable(self):
+    def test_simple_when_slugfield_is_nullable(self):
         answer = Answer.objects.create()
 
         self.assertIsNone(answer.slug)
 
         self.assertEqual(AnswerSlug.objects.count(), 0)
+
+    def test_simple_add_when_slugfield_is_nullable(self):
+        answer = Answer.objects.create()
+
+        answer.slug = "answer"
+        answer.save()
+
+        self.assertEqual(answer.slug, "answer")
+
+        self.assertEqual(AnswerSlug.objects.count(), 1)
+
+        slug = AnswerSlug.objects.get(slug="answer")
+
+        self.assertEqual(slug.slug, "answer")
+
+        self.assertFalse(slug.redirect)
+
+        self.assertEqual(slug.content_object, answer)
 
     def test_redirect(self):
         poll = Poll.objects.create(question="Quick test")

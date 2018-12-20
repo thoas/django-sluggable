@@ -85,7 +85,9 @@ class SluggableField(models.SlugField):
         return None
 
     def instance_post_save(self, instance, **kwargs):
-        if getattr(instance, "%s_changed" % self.name, False) and not self.null:
+        if getattr(instance, "%s_changed" % self.name, False) and (
+         not self.null or self.null and getattr(instance, self.name)
+        ):
             self.decider.objects.update_slug(
                 instance,
                 getattr(instance, self.name),
