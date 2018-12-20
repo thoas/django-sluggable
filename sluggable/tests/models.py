@@ -29,3 +29,11 @@ class UserSlug(Slug):
 
 class User(models.Model):
     username = SluggableField(decider=UserSlug, unique=True)
+
+
+class AnswerSlug(Slug):
+    class Meta:
+        abstract = False
+
+class Answer(models.Model):
+    slug = SluggableField(null=True, decider= AnswerSlug)

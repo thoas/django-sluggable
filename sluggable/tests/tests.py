@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.test import TestCase
 
-from .models import Poll, PollSlug, UserSlug, User
+from .models import Answer, AnswerSlug, Poll, PollSlug, UserSlug, User
 
 
 class SluggableTests(TestCase):
@@ -76,6 +76,13 @@ class SluggableTests(TestCase):
         self.assertFalse(slug.redirect)
 
         self.assertEqual(slug.content_object, poll)
+
+    def test_simple_add_when_slugfield_is_nullable(self):
+        answer = Answer.objects.create()
+
+        self.assertIsNone(answer.slug)
+
+        self.assertEqual(AnswerSlug.objects.count(), 0)
 
     def test_redirect(self):
         poll = Poll.objects.create(question="Quick test")
