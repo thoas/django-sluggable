@@ -110,9 +110,3 @@ class SluggableField(models.SlugField):
             return None
 
         return value
-
-    def south_field_triple(self):
-        "Returns a suitable description of this field for South."
-        args, kwargs = introspector(self)
-        kwargs.update({"populate_from": "None"})
-        return ("sluggable.fields.SluggableField", args, kwargs)
