@@ -35,5 +35,6 @@ class AnswerSlug(Slug):
     class Meta:
         abstract = False
 
+
 class Answer(models.Model):
-    slug = SluggableField(null=True, decider= AnswerSlug)
+    slug = SluggableField(null=True, decider=AnswerSlug)

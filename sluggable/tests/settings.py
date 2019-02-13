@@ -33,4 +33,4 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-SLUGGABLE_SLUGIFY_FUNCTION = 'django.template.defaultfilters.slugify'
+SLUGGABLE_SLUGIFY_FUNCTION = "django.template.defaultfilters.slugify"
