@@ -12,6 +12,8 @@ class SluggableObjectDescriptor(object):
         self.changed = False
 
     def __get__(self, instance, instance_type=None):
+        if not instance:
+            return self
         val = instance.__dict__.get(self.field.attname, None)
 
         if val is None:
