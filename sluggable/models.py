@@ -2,16 +2,15 @@ import django
 
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 
 try:
-    from django.contrib.contenttypes.fields import GenericForeignKey
+    from django.utils.translation import ugettext_lazy as _
 except ImportError:
-    from django.contrib.contenttypes.generic import GenericForeignKey  # noqa
+    from django.utils.translation import gettext_lazy as _  # noqa
 
-from django.utils.translation import ugettext_lazy as _
 from django.db.models.query import QuerySet
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils.encoding import python_2_unicode_compatible
 
 
 from .utils import get_obj_id, generate_unique_slug
@@ -138,7 +137,6 @@ class SlugManager(models.Manager):
                 slug.save()
 
 
-@python_2_unicode_compatible
 class Slug(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
     object_id = models.PositiveIntegerField()
