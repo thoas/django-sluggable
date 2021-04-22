@@ -29,3 +29,5 @@ MIDDLEWARE = [
 ]
 
 SLUGGABLE_SLUGIFY_FUNCTION = "django.template.defaultfilters.slugify"
+
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"

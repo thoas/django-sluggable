@@ -5,7 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 
 try:
-    from django.utils.translation import ugettext_lazy as _
+    from django.utils.translation import gettext_lazy as _
 except ImportError:
     from django.utils.translation import gettext_lazy as _  # noqa
 
@@ -26,11 +26,13 @@ class SlugQuerySet(QuerySet):
         return self.filter_by_obj_id(obj.pk, content_type=content_type, **kwargs)
 
     def filter_by_obj_id(self, obj_id, content_type, **kwargs):
+        kwargs["content_type_id"] = get_obj_id(content_type)
+        kwargs["object_id"] = obj_id
+
         return self._filter_or_exclude(
             kwargs.pop("exclude", False),
-            content_type_id=get_obj_id(content_type),
-            object_id=obj_id,
-            **kwargs
+            (),
+            kwargs,
         )
 
     def filter_by_model(self, klass, **kwargs):
